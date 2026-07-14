@@ -6,6 +6,11 @@
     "client",
     "server"
   ],
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "scheduler": "0.23.2"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
     "client": "npm run dev --workspace client",
