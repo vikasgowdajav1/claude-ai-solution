@@ -69,21 +69,32 @@ app.use('/api/users', userRoutes);
 app.use('/api/search', searchRoutes);
 
 // Serve built frontend in production / Render
-if (existsSync(clientDist)) {
+const spaIndex = resolve(clientDist, 'index.html');
+
+if (existsSync(spaIndex)) {
   app.use(express.static(clientDist));
-  app.get('{*path}', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(resolve(clientDist, 'index.html'));
-  });
-} else {
-  app.use((req, res) => {
-    res.status(404).json({
+}
+
+// SPA fallback + API 404 — must come after all routes
+app.use((req, res) => {
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({
       success: false,
       message: 'Route not found',
       path: req.originalUrl
     });
+  }
+
+  if (existsSync(spaIndex)) {
+    return res.sendFile(spaIndex);
+  }
+
+  res.status(404).json({
+    success: false,
+    message: 'Frontend not built. Run: npm run build',
+    path: req.originalUrl
   });
-}
+});
 
 app.use(errorHandler);
 
