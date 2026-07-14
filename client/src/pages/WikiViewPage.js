@@ -60,8 +60,9 @@ export default function WikiViewPage() {
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
         <h2 className="text-red-800 font-bold mb-2">Error</h2>
         <p className="text-red-700 mb-4">{error || 'Page not found'}</p>
-        <Link to="/" className="text-red-600 hover:text-red-800 font-medium">
-          ← Back to Home
+        <Link to="/" className="inline-flex items-center gap-2 text-red-600 hover:text-red-800 font-medium">
+          <FiArrowLeft className="h-4 w-4" />
+          <span>Back to Home</span>
         </Link>
       </div>
     );
@@ -144,9 +145,13 @@ export default function WikiViewPage() {
       <div className="bg-white rounded-lg shadow">
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className="w-full px-6 py-4 border-b border-gray-200 text-left font-bold text-gray-900 hover:bg-gray-50"
+          className="flex w-full items-center justify-between px-6 py-4 border-b border-gray-200 text-left font-bold text-gray-900 hover:bg-gray-50"
         >
-          📝 Version History ({page.versions?.length || 0})
+          <span className="inline-flex items-center gap-2">
+            <FiEdit2 className="h-4 w-4" />
+            <span>Version History</span>
+          </span>
+          <span className="text-sm font-medium text-gray-500">{page.versions?.length || 0}</span>
         </button>
 
         {showHistory && page.versions && page.versions.length > 0 && (

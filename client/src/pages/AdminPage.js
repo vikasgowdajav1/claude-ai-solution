@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api';
-import { FiUserX } from 'react-icons/fi';
+import { FiActivity, FiCheckCircle, FiShield, FiUserX } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function AdminPage() {
@@ -73,7 +73,10 @@ export default function AdminPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg p-8 text-white">
-        <h1 className="text-4xl font-bold mb-2">🛡️ Admin Dashboard</h1>
+        <h1 className="flex items-center gap-3 text-4xl font-bold mb-2">
+          <FiShield className="h-8 w-8" />
+          <span>Admin Dashboard</span>
+        </h1>
         <p className="text-purple-100">Manage users, content, and system settings</p>
       </div>
 
@@ -190,7 +193,10 @@ export default function AdminPage() {
       {/* System Info */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-gray-900 mb-4">🔐 Security Settings</h3>
+          <h3 className="mb-4 flex items-center gap-2 font-bold text-gray-900">
+            <FiShield className="h-5 w-5 text-purple-600" />
+            <span>Security Settings</span>
+          </h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-gray-600">JWT Expiration</span>
@@ -202,13 +208,16 @@ export default function AdminPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-gray-600">CORS Enabled</span>
-              <span className="text-green-600 font-medium">✓</span>
+              <FiCheckCircle className="h-5 w-5 text-green-600" />
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="font-bold text-gray-900 mb-4">📊 System Info</h3>
+          <h3 className="mb-4 flex items-center gap-2 font-bold text-gray-900">
+            <FiActivity className="h-5 w-5 text-indigo-600" />
+            <span>System Info</span>
+          </h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-gray-600">Environment</span>

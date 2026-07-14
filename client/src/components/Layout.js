@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import { FiBookOpen } from 'react-icons/fi';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
@@ -7,7 +8,7 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-slate-100">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
@@ -24,8 +25,16 @@ export default function Layout() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-white border-t border-gray-200 px-4 py-4 text-center text-sm text-gray-600">
-          <p>📚 Wiki Manager v1.0.0 | Collaborative Documentation System</p>
+        <footer className="border-t border-slate-200 bg-white px-4 py-4 text-sm text-slate-600">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
+            <div className="inline-flex items-center gap-2 font-medium text-slate-700">
+              <FiBookOpen className="h-4 w-4 text-sky-700" />
+              <span>Project Knowledge Assistant</span>
+            </div>
+            <p className="text-slate-500">
+              Built for searchable onboarding, delivery context, and reusable team knowledge.
+            </p>
+          </div>
         </footer>
       </div>
     </div>
