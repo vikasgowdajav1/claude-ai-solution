@@ -1,1 +1,10 @@
 node_modules
+.env
+.env.local
+.env.*.local
+client/.env
+server/.env
+
+# Build output and caches
+client/dist
+client/.vite

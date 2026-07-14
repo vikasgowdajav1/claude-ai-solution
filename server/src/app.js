@@ -1,13 +1,11 @@
+import './config/loadEnv.js';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.js';
 import wikiRoutes from './routes/wiki.js';
 import userRoutes from './routes/user.js';
 import searchRoutes from './routes/search.js';
-
-dotenv.config();
 
 const app = express();
 
@@ -16,9 +14,18 @@ const configuredOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const vercelOrigins = [
+  process.env.VERCEL_URL,
+  process.env.VERCEL_BRANCH_URL,
+  process.env.VERCEL_PROJECT_PRODUCTION_URL
+]
+  .filter(Boolean)
+  .map((origin) => `https://${origin}`);
+
 const allowedOrigins = [
   ...new Set([
     ...configuredOrigins,
+    ...vercelOrigins,
     'http://localhost:3000',
     'http://localhost:3002',
     'http://localhost:5173',

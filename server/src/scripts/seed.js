@@ -1,10 +1,8 @@
-import dotenv from 'dotenv';
+import '../config/loadEnv.js';
 import mongoose from 'mongoose';
 import { connectDB, disconnectDB } from '../config/database.js';
 import User from '../models/User.js';
 import WikiPage from '../models/WikiPage.js';
-
-dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wiki-manager';
 
