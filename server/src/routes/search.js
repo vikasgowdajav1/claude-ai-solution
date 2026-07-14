@@ -31,7 +31,7 @@ router.get('/', async (req, res, next) => {
     }
 
     const results = await query
-      .select('title slug category tags updatedAt')
+      .select('title slug category tags content updatedAt viewCount')
       .populate('author', 'name')
       .limit(parseInt(limit));
 
@@ -74,7 +74,8 @@ router.get('/category/:category', async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const pages = await WikiPage.find({ category, isPublished: true })
-      .select('title slug updatedAt')
+      .select('title slug category tags content updatedAt viewCount')
+      .populate('author', 'name')
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
