@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
 import { connectDB } from './config/database.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRoutes from './routes/auth.js';
@@ -73,21 +72,41 @@ app.use((req, res) => {
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
-// Connect to database and start server
 const PORT = process.env.PORT || 3001;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wiki-manager';
+const resolveMongoUri = () => {
+  const configuredMongoUri = process.env.MONGODB_URI?.trim();
 
-connectDB(MONGODB_URI)
-  .then(() => {
+  console.log('MONGODB_URI exists:', !!configuredMongoUri);
+
+  if (configuredMongoUri) {
+    console.log(`MONGODB_URI prefix: ${configuredMongoUri.slice(0, 25)}`);
+    return configuredMongoUri;
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('MONGODB_URI is required in production');
+  }
+
+  console.warn('MONGODB_URI is missing. Falling back to local MongoDB for development.');
+  return 'mongodb://localhost:27017/wiki-manager';
+};
+
+const startServer = async () => {
+  try {
+    const mongoUri = resolveMongoUri();
+    await connectDB(mongoUri);
+
     app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);
       console.log(`📚 Wiki Manager Backend v1.0.0`);
       console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error('❌ Failed to connect to MongoDB:', error);
     process.exit(1);
-  });
+  }
+};
+
+startServer();
 
 export default app;
