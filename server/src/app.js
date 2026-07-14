@@ -1,4 +1,7 @@
 import './config/loadEnv.js';
+import { existsSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import { errorHandler } from './middleware/errorHandler.js';
@@ -6,6 +9,9 @@ import authRoutes from './routes/auth.js';
 import wikiRoutes from './routes/wiki.js';
 import userRoutes from './routes/user.js';
 import searchRoutes from './routes/search.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const clientDist = resolve(__dirname, '../../client/dist');
 
 const app = express();
 
@@ -62,13 +68,22 @@ app.use('/api/wiki', wikiRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/search', searchRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
-    path: req.originalUrl
+// Serve built frontend in production / Render
+if (existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(resolve(clientDist, 'index.html'));
   });
-});
+} else {
+  app.use((req, res) => {
+    res.status(404).json({
+      success: false,
+      message: 'Route not found',
+      path: req.originalUrl
+    });
+  });
+}
 
 app.use(errorHandler);
 
