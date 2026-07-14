@@ -8,3 +8,6 @@ server/.env
 # Build output and caches
 client/dist
 client/.vite
+
+# Uploaded documents
+server/uploads

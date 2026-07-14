@@ -9,6 +9,11 @@ import authRoutes from './routes/auth.js';
 import wikiRoutes from './routes/wiki.js';
 import userRoutes from './routes/user.js';
 import searchRoutes from './routes/search.js';
+import aiRoutes from './routes/ai.js';
+import ragRoutes from './routes/rag.js';
+import documentRoutes from './routes/documents.js';
+import agentRoutes from './routes/agents.js';
+import approvalRoutes from './routes/approvals.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const clientDist = resolve(__dirname, '../../client/dist');
@@ -67,6 +72,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/wiki', wikiRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/rag', ragRoutes);
+app.use('/api/documents', documentRoutes);
+app.use('/api/agents', agentRoutes);
+app.use('/api/approvals', approvalRoutes);
 
 // Serve built frontend in production / Render
 const spaIndex = resolve(clientDist, 'index.html');

@@ -8,7 +8,11 @@ import RegisterPage from './pages/RegisterPage';
 import WikiEditorPage from './pages/WikiEditorPage';
 import WikiViewPage from './pages/WikiViewPage';
 import SearchPage from './pages/SearchPage';
+import AskAIPage from './pages/AskAIPage';
 import AdminPage from './pages/AdminPage';
+import KnowledgeBasePage from './pages/KnowledgeBasePage';
+import AgentWorkflowPage from './pages/AgentWorkflowPage';
+import ApprovalsPage from './pages/ApprovalsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './styles/index.css';
 
@@ -36,6 +40,14 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/page/:slug" element={<WikiViewPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route
+            path="/ask"
+            element={
+              <ProtectedRoute allowedRoles={['viewer', 'editor', 'admin']}>
+                <AskAIPage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Editor Routes */}
           <Route
@@ -51,6 +63,32 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['editor', 'admin']}>
                 <WikiEditorPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Knowledge Base & Agent Routes */}
+          <Route
+            path="/knowledge-base"
+            element={
+              <ProtectedRoute allowedRoles={['editor', 'admin']}>
+                <KnowledgeBasePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/agents"
+            element={
+              <ProtectedRoute allowedRoles={['viewer', 'editor', 'admin']}>
+                <AgentWorkflowPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/approvals"
+            element={
+              <ProtectedRoute allowedRoles={['editor', 'admin']}>
+                <ApprovalsPage />
               </ProtectedRoute>
             }
           />

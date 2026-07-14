@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiBookOpen, FiChevronLeft, FiChevronRight, FiEdit3, FiHome, FiSearch, FiShield } from 'react-icons/fi';
+import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCpu, FiEdit3, FiHome, FiSearch, FiShield, FiDatabase, FiGitBranch, FiCheckCircle } from 'react-icons/fi';
 import { useAuthStore } from '../store/authStore';
 
 const CATEGORIES = [
@@ -37,10 +37,36 @@ export default function Sidebar({ isOpen, onToggle }) {
       isActive: location.pathname.startsWith('/search')
     },
     {
+      label: 'Ask AI',
+      to: '/ask',
+      icon: FiCpu,
+      isActive: location.pathname.startsWith('/ask')
+    },
+    {
       label: 'Add Knowledge',
       to: '/editor',
       icon: FiEdit3,
       isActive: location.pathname.startsWith('/editor'),
+      visible: user && (user.role === 'editor' || user.role === 'admin')
+    },
+    {
+      label: 'Knowledge Base',
+      to: '/knowledge-base',
+      icon: FiDatabase,
+      isActive: location.pathname.startsWith('/knowledge-base'),
+      visible: user && (user.role === 'editor' || user.role === 'admin')
+    },
+    {
+      label: 'AI Agents',
+      to: '/agents',
+      icon: FiGitBranch,
+      isActive: location.pathname.startsWith('/agents')
+    },
+    {
+      label: 'Approvals',
+      to: '/approvals',
+      icon: FiCheckCircle,
+      isActive: location.pathname.startsWith('/approvals'),
       visible: user && (user.role === 'editor' || user.role === 'admin')
     },
     {

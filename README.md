@@ -1,76 +1,229 @@
-# MERN Launchpad
+# Knowledge Hub — AI-Powered Wiki & RAG Platform
 
-Boilerplate MERN workspace with a Vite React frontend and an Express/MongoDB backend.
+Full-stack knowledge management system with RAG (Retrieval-Augmented Generation), AI agent pipelines, PDF knowledge base, and human-in-the-loop approval workflows.
 
 ## Stack
 
-- React 19 + Vite
-- Express 5
-- MongoDB + Mongoose
-- npm workspaces
+- **Frontend:** React 19 + Vite + Tailwind CSS
+- **Backend:** Express 5 + Mongoose
+- **Database:** MongoDB
+- **AI/LLM:** Ollama (local) with Gemini cloud fallback
+- **Embeddings:** nomic-embed-text via Ollama
+- **Search:** DuckDuckGo API + RSS feeds
+- **Workspaces:** npm workspaces
 
 ## Project Structure
 
 ```text
-client/
-server/
-package.json
+client/                     # React frontend
+  src/
+    pages/
+      AskAIPage.js          # RAG-powered Q&A chat
+      KnowledgeBasePage.js   # PDF upload & document management
+      AgentWorkflowPage.js   # Researcher → Analyst → Publisher pipeline
+      ApprovalsPage.js       # Human-in-the-loop review queue
+      HomePage.js            # Dashboard
+      WikiEditorPage.js      # Wiki page editor
+      SearchPage.js          # Full-text search
+server/                     # Express backend
+  src/
+    services/
+      embeddingService.js    # Text chunking + Ollama embeddings
+      vectorStoreService.js  # Cosine similarity search on MongoDB vectors
+      documentService.js     # PDF processing & knowledge base
+      searchService.js       # DuckDuckGo + RSS feed aggregation
+      agentService.js        # AI agent pipeline orchestration
+    models/
+      Document.js            # Uploaded docs with embedded chunks
+      ApprovalRequest.js     # Approval workflow
+      ResearchTask.js        # Agent pipeline tasks
+      WikiPage.js            # Wiki pages
+    controllers/
+      ragController.js       # RAG Q&A endpoints
+      documentController.js  # Document upload/management
+      agentController.js     # Agent pipeline endpoints
+      approvalController.js  # Approval workflow endpoints
+    routes/
+      rag.js                 # /api/rag/*
+      documents.js           # /api/documents/*
+      agents.js              # /api/agents/*
+      approvals.js           # /api/approvals/*
 ```
+
+## Prerequisites
+
+- **Node.js** 18+
+- **MongoDB** running locally or a MongoDB Atlas connection string
+- **Ollama** installed and running ([ollama.com](https://ollama.com))
 
 ## Getting Started
 
-1. Install dependencies:
+### 1. Install dependencies
 
-	```bash
-	npm install
-	```
+```bash
+npm install
+```
 
-2. Copy environment template files if you want custom values:
+### 2. Pull Ollama models
 
-	```bash
-	copy server\.env.example server\.env
-	copy client\.env.example client\.env
-	```
+```bash
+# Chat/generation model
+ollama pull llama3.2
 
-3. Start the frontend and backend together:
+# Embedding model (required for RAG)
+ollama pull nomic-embed-text
+```
 
-	```bash
-	npm run dev
-	```
+### 3. Configure environment
 
-## Scripts
+```bash
+copy server\.env.example server\.env
+copy client\.env.example client\.env
+```
 
-- `npm run dev` starts both apps.
-- `npm run client` starts the Vite frontend.
-- `npm run server` starts the Express backend.
-- `npm run build` builds the frontend.
-- `npm run check` runs the backend syntax check and frontend build.
+Edit `server/.env` with your values:
 
-## Lovable MCP
+```env
+MONGODB_URI=mongodb://localhost:27017/wiki-manager
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+EMBEDDING_MODEL=nomic-embed-text
+JWT_SECRET=your-secret-key
 
-VS Code can connect to Lovable through [.vscode/mcp.json](.vscode/mcp.json).
+# Optional
+GEMINI_API_KEY=your-gemini-key       # Cloud LLM fallback
+RSS_FEEDS=https://hnrss.org/newest   # Comma-separated RSS feed URLs
+```
 
-After opening the workspace in VS Code:
+### 4. Start the application
 
-1. Open the MCP or agent tools UI.
-2. Select the `lovable` server.
-3. Complete the OAuth sign-in flow in your browser.
+```bash
+# Start both frontend and backend
+npm run dev
+```
 
-Lovable MCP uses OAuth, not API keys.
+- **Frontend:** http://localhost:5173
+- **Backend:** http://localhost:5000
 
-Use [LOVABLE_UI_UPGRADE_PROMPT.md](LOVABLE_UI_UPGRADE_PROMPT.md) as the starting prompt when you want Lovable to improve the current UI without rebuilding the app.
+### 5. Verify Ollama is running
 
-## Ports
+```bash
+ollama list
+```
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:5000`
+You should see both `llama3.2` and `nomic-embed-text` in the list.
+
+## Features
+
+### RAG-Powered Ask AI (`/ask`)
+- Toggle between **RAG mode** (vector search across documents + wiki) and basic wiki text search
+- Shows similarity scores and source types (document vs wiki)
+- Supports model selection from available Ollama models
+
+### Knowledge Base (`/knowledge-base`)
+- **Drag & drop** PDF, TXT, MD, CSV files
+- Automatic text extraction → chunking (~500 word chunks with overlap) → embedding generation
+- Stats dashboard: total documents, embedded count, total chunks
+- Re-embed and reprocess documents on demand
+- Categorize documents: infrastructure, security, deployment, runbook, etc.
+
+### AI Agent Pipeline (`/agents`)
+Three-stage pipeline with configurable data sources:
+
+| Stage | Agent | What it does |
+|-------|-------|-------------|
+| 1 | **Researcher** | Gathers data from Knowledge Base (vector search), DuckDuckGo, and RSS feeds |
+| 2 | **Analyst** | Identifies critical updates, dependency conflicts, risks with severity levels (🔴🟡🟢) |
+| 3 | **Publisher** | Produces polished Markdown report with executive summary and action items |
+
+Toggle sources per research task:
+- ✅ Web Search (DuckDuckGo)
+- ✅ RSS Feeds
+- ✅ Knowledge Base
+- ✅ Require Approval
+
+### Human-in-the-Loop Approvals (`/approvals`)
+- AI agent outputs go through an approval queue before being published
+- Priority levels: 🔴 Critical, 🟠 High, 🟡 Medium, 🟢 Low
+- Approve or reject with review notes
+- Auto-updates linked research task status
+
+### How the RAG Pipeline Works
+
+```
+PDF Upload → Text Extraction → Chunking (500 words, 50 word overlap)
+                                    ↓
+                        Ollama nomic-embed-text
+                                    ↓
+                    Embedding vectors stored in MongoDB
+                                    ↓
+User Question → Generate query embedding → Cosine similarity search
+                                    ↓
+                    Top-K chunks + wiki results → LLM context
+                                    ↓
+                        Ollama llama3.2 generates answer
+```
 
 ## API Endpoints
 
-- `GET /api/health`
-- `GET /api/tasks`
-- `POST /api/tasks`
+### Core
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+
+### RAG
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/rag/ask` | RAG-powered Q&A (vector search + LLM) |
+| POST | `/api/rag/search` | Vector similarity search without LLM |
+
+### Documents (Knowledge Base)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/documents` | List documents |
+| GET | `/api/documents/stats` | Knowledge base stats |
+| POST | `/api/documents/upload` | Upload PDF/TXT/MD/CSV |
+| POST | `/api/documents/reembed` | Re-embed all unembedded docs |
+| POST | `/api/documents/:id/reprocess` | Reprocess a document |
+| DELETE | `/api/documents/:id` | Soft-delete a document |
+
+### AI Agents
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/agents/research` | Start Researcher→Analyst→Publisher pipeline |
+| GET | `/api/agents/tasks` | List research tasks |
+| GET | `/api/agents/tasks/:id` | Get task with pipeline status |
+| POST | `/api/agents/search/external` | Quick DuckDuckGo + RSS search |
+
+### Approvals
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/approvals` | List approval requests |
+| GET | `/api/approvals/pending/count` | Pending approval count |
+| PATCH | `/api/approvals/:id/review` | Approve or reject |
+
+### Wiki & Auth
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register user |
+| POST | `/api/auth/login` | Login |
+| GET | `/api/wiki` | List wiki pages |
+| POST | `/api/ai/ask` | Basic wiki Q&A (non-RAG) |
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start both frontend and backend |
+| `npm run client` | Start Vite frontend only |
+| `npm run server` | Start Express backend only |
+| `npm run build` | Build frontend for production |
+| `npm run check` | Syntax check + build validation |
 
 ## Notes
 
-The backend will start even if MongoDB is not reachable. In that case the health endpoint reports the database as disconnected and the sample tasks endpoints return a `503` response until MongoDB is available.
+- The backend starts even if MongoDB is not reachable; the health endpoint reports disconnected status.
+- If Ollama is not running, the system falls back to Gemini (if `GEMINI_API_KEY` is set).
+- Uploaded documents are stored in `server/uploads/` (gitignored).
+- Embedding vectors are stored directly in MongoDB document chunks — no separate vector DB required.
+- The agent pipeline runs asynchronously; poll `/api/agents/tasks/:id` or use the UI's auto-refresh.
