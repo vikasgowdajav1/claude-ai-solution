@@ -16,6 +16,7 @@
     "client": "npm run dev --workspace client",
     "server": "npm run dev --workspace server",
     "build": "npm run build --workspace client",
+    "start": "node server/src/index.js",
     "check": "node --check \"api/[...route].js\" && npm run check --workspace server && npm run build --workspace client",
     "seed:demo": "npm run seed:demo --workspace server"
   },
