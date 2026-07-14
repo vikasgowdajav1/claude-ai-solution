@@ -71,7 +71,7 @@ app.use('/api/search', searchRoutes);
 // Serve built frontend in production / Render
 if (existsSync(clientDist)) {
   app.use(express.static(clientDist));
-  app.get('*', (req, res, next) => {
+  app.get('{*path}', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
     res.sendFile(resolve(clientDist, 'index.html'));
   });
