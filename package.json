@@ -1,0 +1,25 @@
+{
+  "name": "mern-launchpad",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "scheduler": "0.23.2"
+  },
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
+    "client": "npm run dev --workspace client",
+    "server": "npm run dev --workspace server",
+    "build": "npm run build --workspace client",
+    "check": "npm run check --workspace server && npm run build --workspace client",
+    "seed:demo": "npm run seed:demo --workspace server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
