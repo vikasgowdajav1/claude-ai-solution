@@ -7,6 +7,7 @@
 
 import Document from '../models/Document.js';
 import WikiPage from '../models/WikiPage.js';
+import Trail from '../models/Trail.js';
 import {
   generateEmbedding,
   cosineSimilarity,
@@ -96,15 +97,56 @@ export async function searchWikiPages(query, { topK = 5 } = {}) {
 }
 
 /**
- * Combined RAG search: search both documents (vector) and wiki (text/vector).
+ * Search Sherpa trails for relevant operational knowledge.
+ */
+export async function searchTrails(query, { topK = 3 } = {}) {
+  const queryWords = query.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+  const trails = await Trail.find({ isPublished: true })
+    .select('title description category steps records platforms')
+    .lean({ virtuals: true });
+
+  const scored = trails.map(trail => {
+    const text = `${trail.title} ${trail.description} ${trail.steps.map(s => s.title + ' ' + s.description + ' ' + s.onFailHint).join(' ')}`.toLowerCase();
+    const matchCount = queryWords.filter(w => text.includes(w)).length;
+    const relevance = matchCount / Math.max(queryWords.length, 1);
+
+    // Build trail insight content
+    const totalAttempts = trail.records?.length || 0;
+    const successes = (trail.records || []).filter(r => r.success).length;
+    const failures = (trail.records || []).filter(r => !r.success);
+    const commonFails = failures.map(r => `Step ${r.failedAt}: ${r.failReason}`).filter(Boolean).slice(0, 3);
+
+    const stepsOverview = trail.steps.map(s => {
+      const cmd = s.commands?.windows || s.commands?.mac || '';
+      return `Step ${s.order}: ${s.title}${cmd ? ` → \`${cmd.split('\n')[0]}\`` : ''}${s.cornerCases?.length ? ` ⚠️ ${s.cornerCases[0]}` : ''}`;
+    }).join('\n');
+
+    const content = [
+      `Trail: "${trail.title}" (${trail.category})`,
+      `Success rate: ${totalAttempts > 0 ? Math.round((successes / totalAttempts) * 100) : 0}% (${successes}/${totalAttempts} attempts)`,
+      `Platforms verified: ${trail.platforms?.join(', ')}`,
+      `Steps:\n${stepsOverview}`,
+      commonFails.length > 0 ? `Common failures:\n${commonFails.join('\n')}` : ''
+    ].filter(Boolean).join('\n');
+
+    return { title: trail.title, category: trail.category, content, tags: [], source: 'trail', score: relevance };
+  });
+
+  return scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, topK);
+}
+
+/**
+ * Combined RAG search: search documents (vector), wiki (text), and trails.
  * Merges and deduplicates results.
  */
 export async function ragSearch(query, options = {}) {
   const { topK = 8, category } = options;
 
-  const [docResults, wikiResults] = await Promise.all([
-    searchDocuments(query, { topK: Math.ceil(topK / 2), category }).catch(() => []),
-    searchWikiPages(query, { topK: Math.ceil(topK / 2) }).catch(() => [])
+  const [docResults, wikiResults, trailResults] = await Promise.all([
+    searchDocuments(query, { topK: Math.ceil(topK / 3), category }).catch(() => []),
+    searchWikiPages(query, { topK: Math.ceil(topK / 3) }).catch(() => []),
+    searchTrails(query, { topK: 2 }).catch(() => [])
   ]);
 
   // Normalize and merge
@@ -125,7 +167,8 @@ export async function ragSearch(query, options = {}) {
       content: r.content,
       tags: r.tags,
       score: r.score || 0.5
-    }))
+    })),
+    ...trailResults
   ];
 
   combined.sort((a, b) => b.score - a.score);

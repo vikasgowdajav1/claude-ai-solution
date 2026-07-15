@@ -13,6 +13,7 @@ import AdminPage from './pages/AdminPage';
 import KnowledgeBasePage from './pages/KnowledgeBasePage';
 import AgentWorkflowPage from './pages/AgentWorkflowPage';
 import ApprovalsPage from './pages/ApprovalsPage';
+import SherpaPage from './pages/SherpaPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './styles/index.css';
 
@@ -89,6 +90,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['editor', 'admin']}>
                 <ApprovalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sherpa"
+            element={
+              <ProtectedRoute allowedRoles={['viewer', 'editor', 'admin']}>
+                <SherpaPage />
               </ProtectedRoute>
             }
           />

@@ -14,6 +14,7 @@ import ragRoutes from './routes/rag.js';
 import documentRoutes from './routes/documents.js';
 import agentRoutes from './routes/agents.js';
 import approvalRoutes from './routes/approvals.js';
+import sherpaRoutes from './routes/sherpa.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const clientDist = resolve(__dirname, '../../client/dist');
@@ -77,6 +78,7 @@ app.use('/api/rag', ragRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/approvals', approvalRoutes);
+app.use('/api/sherpa', sherpaRoutes);
 
 // Serve built frontend in production / Render
 const spaIndex = resolve(clientDist, 'index.html');

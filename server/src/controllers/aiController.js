@@ -69,12 +69,17 @@ async function isOllamaReachable() {
   }
 }
 
+const EMBEDDING_ONLY = ['nomic-embed-text', 'all-minilm', 'mxbai-embed-large', 'snowflake-arctic-embed'];
+
 async function askOllama(systemPrompt, userPrompt, model) {
+  const chatModel = (model && !EMBEDDING_ONLY.some(e => model.startsWith(e)))
+    ? model : OLLAMA_MODEL();
+
   const resp = await fetch(`${OLLAMA_BASE_URL()}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: model || OLLAMA_MODEL(),
+      model: chatModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
@@ -161,13 +166,16 @@ export async function listModels(req, res) {
 
     if (resp.ok) {
       const data = await resp.json();
+      const EMBEDDING_MODELS = ['nomic-embed-text', 'all-minilm', 'mxbai-embed-large', 'snowflake-arctic-embed'];
       result.ollama = {
         available: true,
-        models: (data.models || []).map((m) => ({
-          name: m.name,
-          size: m.size,
-          modified: m.modified_at
-        }))
+        models: (data.models || [])
+          .filter((m) => !EMBEDDING_MODELS.some(e => m.name.startsWith(e)))
+          .map((m) => ({
+            name: m.name,
+            size: m.size,
+            modified: m.modified_at
+          }))
       };
     }
   } catch {

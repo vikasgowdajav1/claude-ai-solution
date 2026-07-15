@@ -198,18 +198,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              <div className="flex items-start gap-3">
-                <span className="rounded-2xl bg-white p-2.5 text-slate-700 shadow-sm shadow-slate-200/70">
-                  <FiShield className="h-4 w-4" />
-                </span>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">Demo credentials</p>
-                  <p className="mt-2 text-sm text-slate-600">Email: demo@example.com</p>
-                  <p className="mt-1 text-sm text-slate-600">Password: password123</p>
-                </div>
-              </div>
-            </div>
+            
 
             <p className="mt-6 text-sm text-slate-500">
               Need an account?{' '}
@@ -223,3 +212,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

@@ -12,24 +12,32 @@ const RAG_SYSTEM = `You are Cortex — an AI assistant powered by RAG (Retrieval
 You have access to:
 1. Internal wiki pages
 2. Uploaded documents (PDFs, text files) from the knowledge base
-3. Web search results and RSS feed data
+3. Sherpa trails — verified step-by-step paths that real team members have completed successfully
+4. Web search results and RSS feed data
 
 Rules:
 - Ground your answers in the provided context from all sources
-- Clearly distinguish between internal knowledge and external sources
+- When trail data is available, provide ACTUAL COMMANDS the user can run
+- Mention success rates and platform-specific notes from trail records
+- If someone failed at a step, warn about that specific issue
+- Clearly distinguish between internal knowledge, trails, and external sources
 - If the context doesn't cover the question, say so and suggest what to search for
-- Be concise and use bullet points or short paragraphs
-- When referencing a source, mention its title and type (wiki/document/web)
-- Flag any critical updates, dependency issues, or security concerns you notice
+- Be concise and use bullet points
+- Flag any critical updates, dependency issues, or corner cases
 - Never fabricate information not in the provided context`;
 
+const EMBEDDING_MODELS = ['nomic-embed-text', 'all-minilm', 'mxbai-embed-large', 'snowflake-arctic-embed'];
+
 async function callLLM(systemPrompt, userPrompt, model) {
-  // Use Ollama only — no cloud API keys needed
+  // Never use an embedding model for chat
+  const chatModel = (model && !EMBEDDING_MODELS.some(e => model.startsWith(e)))
+    ? model : OLLAMA_MODEL();
+
   const resp = await fetch(`${OLLAMA_BASE_URL()}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: model || OLLAMA_MODEL(),
+      model: chatModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt.slice(0, 5000) }

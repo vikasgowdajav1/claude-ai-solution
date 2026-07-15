@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCpu, FiEdit3, FiHome, FiSearch, FiShield, FiDatabase, FiGitBranch, FiCheckCircle } from 'react-icons/fi';
+import { FiBookOpen, FiChevronLeft, FiChevronRight, FiCpu, FiEdit3, FiHome, FiSearch, FiShield, FiDatabase, FiGitBranch, FiCheckCircle, FiMap } from 'react-icons/fi';
 import { useAuthStore } from '../store/authStore';
 
 const CATEGORIES = [
@@ -61,6 +61,12 @@ export default function Sidebar({ isOpen, onToggle }) {
       to: '/agents',
       icon: FiGitBranch,
       isActive: location.pathname.startsWith('/agents')
+    },
+    {
+      label: 'Sherpa',
+      to: '/sherpa',
+      icon: FiMap,
+      isActive: location.pathname.startsWith('/sherpa')
     },
     {
       label: 'Approvals',
