@@ -15,43 +15,70 @@ import { searchDuckDuckGo, searchRSSFeeds } from './searchService.js';
 
 const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = () => process.env.OLLAMA_MODEL || 'llama3.2';
+const GROQ_API_KEY = () => process.env.GROQ_API_KEY || '';
+const GROQ_MODEL = () => process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
 // Concurrency guard — prevent duplicate pipeline runs on the same task
 const runningPipelines = new Set();
 
 async function callLLM(systemPrompt, userPrompt, model) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 90000); // 90s timeout
-
+  // Try Ollama first
   try {
-    const resp = await fetch(`${OLLAMA_BASE_URL()}/api/chat`, {
+    const check = await fetch(`${OLLAMA_BASE_URL()}/api/tags`, { signal: AbortSignal.timeout(2000) });
+    if (check.ok) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 90000);
+      try {
+        const resp = await fetch(`${OLLAMA_BASE_URL()}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: model || OLLAMA_MODEL(),
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt.slice(0, 4000) }
+            ],
+            stream: false,
+            options: { temperature: 0.3, num_predict: 512 }
+          }),
+          signal: controller.signal
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          return data.message?.content || '';
+        }
+      } finally { clearTimeout(timeout); }
+    }
+  } catch { /* Ollama not available */ }
+
+  // Fallback to Groq
+  if (GROQ_API_KEY()) {
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY()}`
+      },
       body: JSON.stringify({
-        model: model || OLLAMA_MODEL(),
+        model: GROQ_MODEL(),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt.slice(0, 4000) }
         ],
-        stream: false,
-        options: {
-          temperature: 0.3,
-          num_predict: 512
-        }
+        temperature: 0.3,
+        max_tokens: 512
       }),
-      signal: controller.signal
+      signal: AbortSignal.timeout(30000)
     });
-
     if (!resp.ok) {
       const errBody = await resp.text();
-      throw new Error(`LLM error ${resp.status}: ${errBody}`);
+      throw new Error(`Groq error ${resp.status}: ${errBody}`);
     }
-
     const data = await resp.json();
-    return data.message?.content || '';
-  } finally {
-    clearTimeout(timeout);
+    return data.choices?.[0]?.message?.content || '';
   }
+
+  throw new Error('No AI provider available. Start Ollama or set GROQ_API_KEY.');
 }
 
 // ═══════════════════════════════════════════════════════════════════

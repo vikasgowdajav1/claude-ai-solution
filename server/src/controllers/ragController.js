@@ -6,6 +6,8 @@ import { ragSearch, buildRAGContext } from '../services/vectorStoreService.js';
 
 const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = () => process.env.OLLAMA_MODEL || 'llama3.2';
+const GROQ_API_KEY = () => process.env.GROQ_API_KEY || '';
+const GROQ_MODEL = () => process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
 const RAG_SYSTEM = `You are Cortex — an AI assistant powered by RAG (Retrieval-Augmented Generation).
 
@@ -28,8 +30,7 @@ Rules:
 
 const EMBEDDING_MODELS = ['nomic-embed-text', 'all-minilm', 'mxbai-embed-large', 'snowflake-arctic-embed'];
 
-async function callLLM(systemPrompt, userPrompt, model) {
-  // Never use an embedding model for chat
+async function callOllama(systemPrompt, userPrompt, model) {
   const chatModel = (model && !EMBEDDING_MODELS.some(e => model.startsWith(e)))
     ? model : OLLAMA_MODEL();
 
@@ -43,10 +44,7 @@ async function callLLM(systemPrompt, userPrompt, model) {
         { role: 'user', content: userPrompt.slice(0, 5000) }
       ],
       stream: false,
-      options: {
-        temperature: 0.4,
-        num_predict: 600
-      }
+      options: { temperature: 0.4, num_predict: 600 }
     }),
     signal: AbortSignal.timeout(90000)
   });
@@ -58,6 +56,53 @@ async function callLLM(systemPrompt, userPrompt, model) {
 
   const data = await resp.json();
   return { answer: data.message?.content || '', provider: 'ollama' };
+}
+
+async function callGroq(systemPrompt, userPrompt) {
+  const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_API_KEY()}`
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL(),
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt.slice(0, 5000) }
+      ],
+      temperature: 0.4,
+      max_tokens: 600
+    }),
+    signal: AbortSignal.timeout(30000)
+  });
+
+  if (!resp.ok) {
+    const errBody = await resp.text();
+    throw new Error(`Groq error ${resp.status}: ${errBody}`);
+  }
+
+  const data = await resp.json();
+  return { answer: data.choices?.[0]?.message?.content || '', provider: 'groq' };
+}
+
+async function callLLM(systemPrompt, userPrompt, model) {
+  // Try Ollama first (local, free)
+  try {
+    const ollamaCheck = await fetch(`${OLLAMA_BASE_URL()}/api/tags`, {
+      signal: AbortSignal.timeout(2000)
+    });
+    if (ollamaCheck.ok) {
+      return await callOllama(systemPrompt, userPrompt, model);
+    }
+  } catch { /* Ollama not available */ }
+
+  // Fallback to Groq (cloud, fast)
+  if (GROQ_API_KEY()) {
+    return await callGroq(systemPrompt, userPrompt);
+  }
+
+  throw new Error('No AI provider available. Start Ollama locally or set GROQ_API_KEY.');
 }
 
 /**

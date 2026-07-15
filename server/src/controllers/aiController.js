@@ -2,6 +2,8 @@ import WikiPage from '../models/WikiPage.js';
 
 const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = () => process.env.OLLAMA_MODEL || 'llama3.2';
+const GROQ_API_KEY = () => process.env.GROQ_API_KEY || '';
+const GROQ_MODEL = () => process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
 
 const SYSTEM_INSTRUCTION = `You are Cortex — an AI assistant that helps team members find answers from their internal wiki.
 
@@ -97,18 +99,34 @@ async function askOllama(systemPrompt, userPrompt, model) {
   return data.message?.content || 'No response generated.';
 }
 
-// --- Provider: Gemini (cloud fallback) ---
+// --- Provider: Groq (cloud fallback) ---
 
-async function askGemini(systemPrompt, userPrompt) {
-  const { GoogleGenAI } = await import('@google/genai');
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
-    contents: `${systemPrompt}\n\n${userPrompt}`
+async function askGroq(systemPrompt, userPrompt) {
+  const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_API_KEY()}`
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL(),
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt.slice(0, 5000) }
+      ],
+      temperature: 0.4,
+      max_tokens: 600
+    }),
+    signal: AbortSignal.timeout(30000)
   });
 
-  return response.text || 'No response generated.';
+  if (!resp.ok) {
+    const errBody = await resp.text();
+    throw new Error(`Groq error ${resp.status}: ${errBody}`);
+  }
+
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || 'No response generated.';
 }
 
 // --- Route handlers ---
@@ -133,13 +151,13 @@ export async function askAI(req, res, next) {
     if (ollamaUp) {
       answer = await askOllama(SYSTEM_INSTRUCTION, userPrompt, model);
       provider = 'ollama';
-    } else if (process.env.GEMINI_API_KEY) {
-      answer = await askGemini(SYSTEM_INSTRUCTION, userPrompt);
-      provider = 'gemini';
+    } else if (GROQ_API_KEY()) {
+      answer = await askGroq(SYSTEM_INSTRUCTION, userPrompt);
+      provider = 'groq';
     } else {
       return res.status(503).json({
         success: false,
-        message: 'No AI provider available. Start Ollama locally or set GEMINI_API_KEY.'
+        message: 'No AI provider available. Start Ollama locally or set GROQ_API_KEY.'
       });
     }
 
@@ -157,7 +175,7 @@ export async function askAI(req, res, next) {
 }
 
 export async function listModels(req, res) {
-  const result = { ollama: null, gemini: null };
+  const result = { ollama: null, groq: null };
 
   try {
     const resp = await fetch(`${OLLAMA_BASE_URL()}/api/tags`, {
@@ -182,9 +200,9 @@ export async function listModels(req, res) {
     result.ollama = { available: false, models: [] };
   }
 
-  result.gemini = {
-    available: !!process.env.GEMINI_API_KEY,
-    models: process.env.GEMINI_API_KEY ? [{ name: 'gemini-2.0-flash' }] : []
+  result.groq = {
+    available: !!GROQ_API_KEY(),
+    models: GROQ_API_KEY() ? [{ name: GROQ_MODEL() }] : []
   };
 
   res.json({ success: true, ...result });

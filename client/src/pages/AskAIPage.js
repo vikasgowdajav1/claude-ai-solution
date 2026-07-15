@@ -24,14 +24,14 @@ export default function AskAIPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [models, setModels] = useState({ ollama: null, gemini: null });
+  const [models, setModels] = useState({ ollama: null, groq: null });
   const [selectedModel, setSelectedModel] = useState('');
   const [useRAG, setUseRAG] = useState(true);
   const bottomRef = useRef(null);
 
   useEffect(() => {
     api.get('/ai/models').then(({ data }) => {
-      setModels({ ollama: data.ollama, gemini: data.gemini });
+      setModels({ ollama: data.ollama, groq: data.groq });
       if (data.ollama?.available && data.ollama.models.length > 0) {
         setSelectedModel(data.ollama.models[0].name);
       }
@@ -120,8 +120,8 @@ export default function AskAIPage() {
             <div className="flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600">
               {models.ollama?.available
                 ? <><FiServer className="h-3 w-3 text-green-500" /> Ollama</>
-                : models.gemini?.available
-                ? <><FiCloud className="h-3 w-3 text-blue-500" /> Gemini</>
+                : models.groq?.available
+                ? <><FiCloud className="h-3 w-3 text-blue-500" /> Groq</>
                 : <><FiCpu className="h-3 w-3 text-slate-400" /> No provider</>
               }
             </div>
