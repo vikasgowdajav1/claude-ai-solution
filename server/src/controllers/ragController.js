@@ -24,39 +24,32 @@ Rules:
 - Never fabricate information not in the provided context`;
 
 async function callLLM(systemPrompt, userPrompt, model) {
-  // Try Ollama first
-  try {
-    const resp = await fetch(`${OLLAMA_BASE_URL()}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: model || OLLAMA_MODEL(),
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        stream: false
-      })
-    });
+  // Use Ollama only — no cloud API keys needed
+  const resp = await fetch(`${OLLAMA_BASE_URL()}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: model || OLLAMA_MODEL(),
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt.slice(0, 5000) }
+      ],
+      stream: false,
+      options: {
+        temperature: 0.4,
+        num_predict: 600
+      }
+    }),
+    signal: AbortSignal.timeout(90000)
+  });
 
-    if (resp.ok) {
-      const data = await resp.json();
-      return { answer: data.message?.content || '', provider: 'ollama' };
-    }
-  } catch { /* fall through */ }
-
-  // Fallback to Gemini
-  if (process.env.GEMINI_API_KEY) {
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: `${systemPrompt}\n\n${userPrompt}`
-    });
-    return { answer: response.text || '', provider: 'gemini' };
+  if (!resp.ok) {
+    const errBody = await resp.text();
+    throw new Error(`Ollama error ${resp.status}: ${errBody}`);
   }
 
-  throw new Error('No AI provider available');
+  const data = await resp.json();
+  return { answer: data.message?.content || '', provider: 'ollama' };
 }
 
 /**

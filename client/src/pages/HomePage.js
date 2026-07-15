@@ -405,7 +405,7 @@ export default function HomePage() {
           <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-200/60">
             <h2 className="text-xl font-semibold text-slate-900">Source readiness</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Signal what the MVP already supports and what connects next.
+              Signal what the platform currently supports and what connects next.
             </p>
 
             <div className="mt-5 space-y-3">

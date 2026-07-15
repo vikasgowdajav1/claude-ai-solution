@@ -35,7 +35,7 @@ export default function Navbar() {
                 Project Knowledge Assistant
               </span>
               <span className="block truncate text-xs uppercase tracking-[0.22em] text-slate-400">
-                Version1 Hackathon MVP
+                AI-Powered Knowledge Hub
               </span>
             </span>
           </Link>
