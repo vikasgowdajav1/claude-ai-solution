@@ -94,7 +94,7 @@ export default function Sidebar({ isOpen, onToggle }) {
     <aside className="flex w-72 shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-slate-100">
       <div className="border-b border-slate-800 px-6 py-6">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-300/80">
-          Knowledge Hub
+          Cortex
         </p>
         <h2 className="mt-3 text-lg font-semibold text-white">Project context at team speed.</h2>
         <p className="mt-2 text-sm leading-6 text-slate-400">

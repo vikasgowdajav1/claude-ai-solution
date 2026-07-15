@@ -55,9 +55,9 @@ export default function LoginPage() {
               <span>Back to home</span>
             </Link>
 
-            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">
-              <FiBookOpen className="h-3.5 w-3.5" />
-              <span>Project Knowledge Assistant</span>
+            <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-slate-900">
+              <img src="/favicon.svg" alt="Cortex" className="h-4 w-4" />
+              <span>Cortex</span>
             </div>
 
             <h1 className="mt-6 max-w-lg text-4xl font-semibold tracking-tight text-white xl:text-5xl">
@@ -132,8 +132,8 @@ export default function LoginPage() {
             </Link>
 
             <div className="mt-5 lg:mt-2">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-950/10">
-                <FiBookOpen className="h-5 w-5" />
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-lg shadow-slate-200/60 ring-1 ring-slate-200">
+                <img src="/favicon.svg" alt="Cortex" className="h-7 w-7" />
               </div>
               <h2 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950">
                 Welcome back

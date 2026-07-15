@@ -29,7 +29,7 @@ export default function Layout() {
           <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
             <div className="inline-flex items-center gap-2 font-medium text-slate-700">
               <FiBookOpen className="h-4 w-4 text-sky-700" />
-              <span>Project Knowledge Assistant</span>
+              <span>Cortex</span>
             </div>
             <p className="text-slate-500">
               Built for searchable onboarding, delivery context, and reusable team knowledge.

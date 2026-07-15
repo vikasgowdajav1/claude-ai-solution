@@ -3,7 +3,7 @@ import WikiPage from '../models/WikiPage.js';
 const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = () => process.env.OLLAMA_MODEL || 'llama3.2';
 
-const SYSTEM_INSTRUCTION = `You are the Project Knowledge Assistant — an AI that helps team members find answers from their internal wiki.
+const SYSTEM_INSTRUCTION = `You are Cortex — an AI assistant that helps team members find answers from their internal wiki.
 
 Rules:
 - Ground your answers in the wiki context provided below.

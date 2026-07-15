@@ -1,4 +1,4 @@
-# Knowledge Hub — AI-Powered Wiki & RAG Platform
+# Cortex — AI-Powered Project Knowledge Assistant
 
 Full-stack knowledge management system with RAG (Retrieval-Augmented Generation), AI agent pipelines, PDF knowledge base, and human-in-the-loop approval workflows.
 

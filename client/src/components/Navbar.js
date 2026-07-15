@@ -27,15 +27,15 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
         <div className="flex items-center gap-3 lg:gap-6">
           <Link to="/" className="flex min-w-0 items-center gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-500/15 text-sm font-semibold tracking-[0.24em] text-sky-300 ring-1 ring-inset ring-sky-400/30">
-              KA
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-slate-200">
+              <img src="/favicon.svg" alt="Cortex" className="h-6 w-6" />
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold text-white sm:text-base">
-                Project Knowledge Assistant
+                Cortex
               </span>
               <span className="block truncate text-xs uppercase tracking-[0.22em] text-slate-400">
-                AI-Powered Knowledge Hub
+                Project Knowledge Assistant
               </span>
             </span>
           </Link>
@@ -44,10 +44,10 @@ export default function Navbar() {
             <div className="group relative">
               <input
                 type="text"
-                placeholder="Ask about architecture, requirements, APIs, or decisions"
+                placeholder="Search knowledge base…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-3 pl-11 pr-12 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-400/40 focus:outline-none focus:ring-2 focus:ring-sky-400/30"
+                className="w-full rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-3 pl-11 pr-16 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-400/40 focus:outline-none focus:ring-2 focus:ring-sky-400/30"
               />
               <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500 transition group-focus-within:text-sky-300" />
               <button

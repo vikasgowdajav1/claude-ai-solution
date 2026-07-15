@@ -7,7 +7,7 @@ import { ragSearch, buildRAGContext } from '../services/vectorStoreService.js';
 const OLLAMA_BASE_URL = () => process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
 const OLLAMA_MODEL = () => process.env.OLLAMA_MODEL || 'llama3.2';
 
-const RAG_SYSTEM = `You are the Project Knowledge Assistant — an AI powered by RAG (Retrieval-Augmented Generation).
+const RAG_SYSTEM = `You are Cortex — an AI assistant powered by RAG (Retrieval-Augmented Generation).
 
 You have access to:
 1. Internal wiki pages
